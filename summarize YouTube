@@ -1,22 +1,35 @@
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
+from pytube import extract
 
 import os
 import textwrap
 import re
 import openai
+import urllib
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+summury_file_path = r"vedio_summary"
+openai.api_key = "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"
+#OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_ORGANIZATION = os.getenv("OPENAI_ORGANIZATION")
 
 openai.organization = OPENAI_ORGANIZATION
-openai.api_key = OPENAI_API_KEY
-
 PROMPT_STRING = "Write a detailed summary of the following:\n\n<<SUMMARY>>\n"
+# openai.api_key = OPENAI_API_KEY
+url= input("Enter your url")
+#url='https://youtu.be/kqtD5dpn9C8'
+video_id=extract.video_id(url)
 
-# Get transcript for given YouTube video id
-video_id = "zzMLg3Ys5vI"
+#summary_file_path = r"vedio_summary"
+#openai.api_key = "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"
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+#OPENAI_ORGANIZATION = os.getenv("OPENAI_ORGANIZATION")
+
+#openai.organization = OPENAI_ORGANIZATION
+# openai.api_key = OPENAI_API_KEY
+
 transcript = YouTubeTranscriptApi.get_transcript(video_id)
+#   title = transcript['items'][0]['snippet']['title']
 
 # Format transcript using TextFormatter from youtube_transcript_api library
 formatter = TextFormatter()
@@ -35,7 +48,7 @@ summaries = list()
 
 # For each chunk of characters, generate a summary
 for chunk in chunks:
-prompt = PROMPT_STRING.replace("<<SUMMARY>>", chunk)
+    prompt = PROMPT_STRING.replace("<<SUMMARY>>", chunk)
 
 # Generate summary using GPT-3
 # If the davinci model is incurring too much cost, 
@@ -58,6 +71,10 @@ final_summary = re.sub("\s+", " ", response.choices[0].text.strip())
 
 # Print out all of the summaries
 for idx, summary in enumerate(summaries):
-print(f"({idx}) - {summary}\n")
+    print(f"({idx}) - {summary}\n")
 
-print(f"(Final Summary) - {final_summary}")
+#youtube_summury_file = summury_file_path.replace(os.path.splitext(summury_file_path)[1], "_summary.txt")
+youtube_summury_file = summury_file_path
+with open(youtube_summury_file, "w+") as file:
+    file.write(final_summary)
+#print(f"(Final Summary) - {final_summary}")
